@@ -9,6 +9,7 @@ import openai
 import numpy
 import json
 import uuid
+import os
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -22,7 +23,7 @@ class db_raw:
   def __getitem__(self, key):
     return json.loads(db.get_raw(key)) if type(db[key]) == ObservedList or type(db[key]) == ObservedDict else db[key]
 db_raw = db_raw()
-openai.api_key = "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"
+openai.api_key = os.environ["OPENAI_KEY"]
 
 def proccess_data(url):
   return html2text.html2text(requests.get(url).text)
