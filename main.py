@@ -1,5 +1,5 @@
 from replit.database.database import ObservedList, ObservedDict
-from fix_cors import fix_cors
+from flask_cors import CORS, cross_origin
 from replit import db
 from flask import *
 import validators
@@ -11,6 +11,8 @@ import json
 import uuid
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config["CORS_HEADERS"] = "Content-Type"
 class db_raw:
   def items(self):
     findata = {}
@@ -20,7 +22,7 @@ class db_raw:
   def __getitem__(self, key):
     return json.loads(db.get_raw(key)) if type(db[key]) == ObservedList or type(db[key]) == ObservedDict else db[key]
 db_raw = db_raw()
-openai.api_key = os.environ["OPENAI_KEY"]
+openai.api_key = "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"
 
 def proccess_data(url):
   return html2text.html2text(requests.get(url).text)
@@ -33,7 +35,7 @@ def vector_similarity(x, y):
   return numpy.dot(numpy.array(x), numpy.array(y))
 
 @app.route("/api/create", methods=["POST"])
-@fix_cors
+@cross_origin()
 def create_bookmark():
   if request.json["userId"] not in db:
     db[request.json["userId"]] = []
@@ -49,7 +51,7 @@ def create_bookmark():
   return daid
 
 @app.route("/api/bookmarks", methods=["GET"])
-@fix_cors
+@cross_origin()
 def get_bookmarks():
   try:
     return jsonify(db_raw[request.args.get("userId")])
@@ -57,7 +59,7 @@ def get_bookmarks():
     return jsonify([])
 
 @app.route("/api/bookmark", methods=["GET"])
-@fix_cors
+@cross_origin()
 def get_bookmark():
   index = 0
   for i, x in enumerate(db_raw[request.args.get("userId")]):
@@ -66,7 +68,7 @@ def get_bookmark():
   return jsonify(db_raw[request.args.get("userId")][index])
 
 @app.route("/api/delete", methods=["POST"])
-@fix_cors
+@cross_origin()
 def delete_bookmark():
   index = 0
   for i, x in enumerate(db_raw[request.json["userId"]]):
@@ -76,7 +78,7 @@ def delete_bookmark():
   return ""
 
 @app.route("/api/query", methods=["GET"])
-@fix_cors
+@cross_origin()
 def query_bookmark():
   search = request.args.get("q")
   bookmarks = db_raw[request.args.get("userId")]
